@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Twilio.Chuck.Norris.Api.Models;
+using Twilio.Chuck.Norris.Api.Services;
 
 namespace Twilio.Chuck.Norris.Api
 {
@@ -36,6 +37,8 @@ namespace Twilio.Chuck.Norris.Api
             services.AddOptions();
 
             services.Configure<TwilioOptions>(Configuration.GetSection("TwilioOptions"));
+
+            services.AddSingleton<IMessager, Messager>();
 
             // Add framework services.
             services.AddMvc();

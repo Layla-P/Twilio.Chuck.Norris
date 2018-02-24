@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Twilio.AspNet.Core;
 using Twilio.Chuck.Norris.Api.Models;
+using Twilio.Chuck.Norris.Api.Services;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.TwiML;
 using Twilio.Types;
@@ -14,44 +15,23 @@ namespace Twilio.Chuck.Norris.Api.Controllers
     public class MessageController : TwilioController
     {
         
-        private readonly TwilioOptions _twilioOptions;
+        private readonly IMessager _messager;
 
-        public MessageController(IOptions<TwilioOptions> options)
+        public MessageController(IMessager messager)
         {
-            _twilioOptions = options.Value;
+            _messager = messager ?? throw new ArgumentException(nameof(messager));
         }
         
         [HttpPost]
-        public async Task Post([FromBody] MessageModel messageModel)
+        public async Task<IActionResult> Post([FromBody] MessageViewModel messageViewModel)
         {
-            var accountSid =  _twilioOptions.AccountSid;
-            var authToken = _twilioOptions.AuthToken;
-
-            TwilioClient.Init(accountSid, authToken);
-            var phoneNumber = new PhoneNumber(messageModel.To);
-            var message = messageModel.Body;
-
-
-            try
-            {
-                await MessageResource.CreateAsync(
-                    to: phoneNumber,
-                    from: new PhoneNumber(_twilioOptions.PhoneNumber),
-                    body: message);
-
-            }
-            catch (Exception exception)
-            {
-                Console.Write(exception);
-            }
+            var response = await
+                _messager.SendSms(messageViewModel)
+                    .ConfigureAwait(false);
             
-
+            return response ? Ok() : StatusCode(500);
         }
 
-        public class MessageModel
-        {
-            public string To { get; set; }
-            public string Body { get; set; }
-        }
+        
     }
 }
