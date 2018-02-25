@@ -39,7 +39,7 @@ namespace Twilio.Chuck.Norris.Api
             services.Configure<TwilioOptions>(Configuration.GetSection("TwilioOptions"));
 
             services.AddSingleton<IMessager, Messager>();
-
+            services.AddSingleton<IJokeService, JokeService>();
             // Add framework services.
             services.AddMvc();
         }
